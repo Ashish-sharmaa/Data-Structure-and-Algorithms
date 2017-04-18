@@ -3,75 +3,90 @@
 using namespace std;
 int main()
 {
-    ll i,j,k,l1,l2,c=0,I=0,J=0;
+    ll i,j,k,l1,l2,n,m,p;
     string s1,s2;
     cout<<" enter the two strings\n";
-    cin>>s1>>s2;
+    cin>>s1;
+    cin>>s2;
     l1=s1.size();
     l2=s2.size();
-    ll a[l1+1][l2+1],b[l1+1][l2+1];
+    ll a[l1][l2],b[l1][l2];
     memset(a,0,sizeof(a));
     memset(b,0,sizeof(b));
-    for(i=1;i<=l1;i++)
+    b[0][0]=1;
+    for(i=0;i<l2;i++)
     {
-        for(j=1;j<=l2;j++)
+        if(s1[0]==s2[i])
         {
-            if(s1[i-1]==s2[j-1])
+            a[0][i]=1;
+            b[0][i]=3;
+        }
+        else
+        {
+            if(i!=0)
+                a[0][i]=a[0][i-1];
+            b[0][i]=1;
+        }
+    }
+    for(i=0;i<l1;i++)
+    {
+        if(s1[i]==s2[0])
+        {
+            a[i][0]=1;
+            b[i][0]=3;
+        }
+        else
+        {
+            if(i!=0)
+            {
+                a[i][0]=a[i-1][0];
+                b[i][0]=2;
+            }
+        }
+    }
+    for(i=1;i<l1;i++)
+    {
+        for(j=1;j<l2;j++)
+        {
+            if(s1[i]==s2[j])
             {
                 a[i][j]=a[i-1][j-1]+1;
-                if(a[i][j]>c)
-                    c=a[i][j];
                 b[i][j]=3;
-                I=i;
-                J=j;
             }
             else
             {
-                if(a[i-1][j]>=a[i][j-1])
+                if(a[i-1][j]>a[i][j-1])
                 {
                     a[i][j]=a[i-1][j];
-                    b[i][j]=1;
+                    b[i][j]=2;
                 }
                 else
                 {
                     a[i][j]=a[i][j-1];
-                    b[i][j]=2;
+                    b[i][j]=1;
                 }
             }
         }
     }
-    for(i=0;i<=l1;i++)
-    {
-        for(j=0;j<=l2;j++)
-            cout<<a[i][j]<<" ";
-        cout<<endl;
-    }
-    cout<<"\nlength of lcs is "<<c<<endl;
-//        for(i=0;i<=l1;i++)
-//    {
-//        for(j=0;j<=l2;j++)
-//            cout<<b[i][j]<<" ";
-//        cout<<endl;
-//    }
+    i=l1-1;
+    j=l2-1;
+    cout<<"length is "<<a[i][j]<<endl;
     string ans;
-    char cc;
-    while(I!=0&&J!=0)
+    while(i>=0&&j>=0)
     {
-        if(b[I][J]==3)
+        if(b[i][j]==3)
         {
-            cc=s1[I-1];
-            ans=cc+ans;
-            I--;
-            J--;
+            ans=s1[i]+ans;
+            i--;
+            j--;
         }
-        else if(b[I][J]==2)
-            J--;
+        else if(b[i][j]==2)
+        {
+            i--;
+        }
         else
-            I--;
+            j--;
     }
-    if(ans.empty()==0)
-    cout<<ans<<endl;
-    else
-        cout<<"No  common subsequence\n";
+    cout<<"The LCS is: "<<ans<<endl;
     return 0;
 }
