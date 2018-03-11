@@ -1,54 +1,110 @@
 #include<bits/stdc++.h>
-#define ll long long 
-#define dbg(x) cerr<< #x <<" is "<<x<<endl;
+#define ll long 
 using namespace std;
-// Complexity is O(n^2)
+#define dbg(x) cerr<<#x<<" is "<<x<<endl;
+// Manacher's algo O(n) to find longest pallindrome substring
+string toOddLength(string s)      // Making the string of length 2*n+1 to compensate for even length strings
+{
+	string ans="#";
+	for(int i=0;s[i]!='\0';i++)
+	{
+		ans=ans+s[i];
+		ans=ans+'#';
+	}
+	return ans;
+}
+string toOriginal(string s,int j,int ans) // converting back to original
+{
+	string v;
+	ans=ans/2;
+	for(int i=0;i<=ans;i++)
+	{
+		if(s[j-i]!='#')
+			v=s[j-i]+v;
+		if(s[i+j]!='#'&&i!=0)
+			v=v+s[i+j];
+	}
+	return v;
+}
 int main()
 {
+	freopen("test_case.txt","r",stdin);
 	string s;
 	cin>>s;
-	ll i,j,k,l,n,m;
-	n=s.size();
-	ll a[n+1][n+1];
+	s=toOddLength(s);
+	int n=s.size();
+	int a[n];
 	memset(a,0,sizeof(a));
-	for(i=0;i<n;i++)
+	int i=0;
+	int centre=1;  // next centre to be taken
+	int left,right;
+	left=right=0;  // leftmost and rightmost portion of the current pallindrome with i as mid
+	while(i<n)
 	{
-		a[i][i]=1;   //As we can get pallindrome of length 1 from each character
-					 //(we are taking columns as string length(counting starts from diagnol(i,i))
-	}
-	k=1;
-	ll st=0;
-	for(i=0;i<n-1;i++)
-	{
-		if(s[i]==s[i+1])
+		while(left>=0&&right<n)
 		{
-			a[i][i+1]=1;  //Did not append with 3 case as we can not have middle of (i,i+1) as we are
-			k=2;		  // dealing with upper triangle only
-			st=i;
-		}
-	}
-	ll comp=3;
-	for(i=0;i<n;i++)
-	{
-		j=i+comp-1;
-		if(s[i]==s[j])  // first ==last
-		{
-			if(a[i+1][j-1]==1) // Checking that if first+1 and last-1 is pallindrome or not
+			if(s[left]==s[right])
 			{
-				k=comp;
-				st=i;
-				a[i][j]=1;
+				if(left==right)
+					a[i]+=1;
+				else
+					a[i]+=2;
+				left--;
+				right++;
 			}
+			else
+				break;
 		}
-		if(j>=n-1)
-		{
-			i=0;
-			comp++;
-		}
-		if(comp>n)
+		if(right==n)
 			break;
+		left++;
+		right--;
+		if(left==right)    // pallindrome of length=1
+		{
+			i=left=right=centre;
+			centre++;
+			continue;
+		}
+		int mm=i-a[i]/2;
+		while(centre<=right)    // considering all the possible centres upto right
+		{
+			int temp1=2*i-centre;
+			temp1=temp1-a[temp1]/2;
+			if(temp1>mm)                   // case 1
+			{
+				a[centre]=a[2*i-centre];
+			}
+			else if(temp1==mm)            // case 3 and important one
+			{
+				a[centre]=a[2*i-centre];
+				left=centre-(a[centre]/2+1);
+				right++;
+				break;
+			}
+			else          // case 4
+			{
+				a[centre]=(right-centre)*2+1;
+			}
+			centre++;
+		}
+		if(centre>right)        //  important if centre becomes larger than left in case of 1 character pallindrome
+		{
+			left=right=centre;
+		}
+		i=centre;
+		centre++;
 	}
-	cout<<"Length of largest pallindrome substring is "<<k<<endl;
-	cout<<" String ="<<s.substr(st,k)<<endl;
+	int ans=0,j=0;
+	for(int i=0;i<n;i++)
+	{
+		cout<<a[i]<<" ";
+		if(a[i]>ans)
+		{
+			j=i;
+			ans=a[i];
+		}
+	}
+	cout<<endl;
+	cout<<toOriginal(s,j,ans)<<endl;
 	return 0;
 }
